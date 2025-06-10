@@ -64,7 +64,7 @@ public class KonnekNative: NSObject {
                 KonnekNative.initConfigData = data
                 self.configSetup?(data)
             case .failure(let error):
-//                print("Error: \(error.localizedDescription)")
+                print("Error: \(error.localizedDescription)")
             }
         }
     }
