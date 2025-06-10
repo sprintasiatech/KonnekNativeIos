@@ -36,10 +36,38 @@ public class KonnekNative: NSObject {
     }
     
     // ✅ Called first by the client
-    @objc public func initFunction(clientId: String, clientSecret: String, flavor: String) {
+    @objc public func initFunction(
+        clientId: String,
+        clientSecret: String,
+        flavor: String = "production",
+    ) {
         KonnekNative.clientId = clientId
         KonnekNative.clientSecret = clientSecret
         KonnekNative.flavor = flavor
+        
+        KonnekNative.flutterEngine = FlutterEngine(name: KonnekNative.engineName)
+        KonnekNative.flutterEngine?.run()
+        if let engine = KonnekNative.flutterEngine {
+            GeneratedPluginRegistrant.register(with: engine)
+        }
+        // Setup method channel
+        if let binaryMessenger = KonnekNative.flutterEngine?.binaryMessenger {
+            KonnekNative.methodChannel = FlutterMethodChannel(
+                name: KonnekNative.channelName,
+                binaryMessenger: binaryMessenger,
+            )
+        }
+        callConfig()
+    }
+    
+    @objc public func initFunction(
+        clientId: String,
+        clientSecret: String,
+    ) {
+        KonnekNative.clientId = clientId
+        KonnekNative.clientSecret = clientSecret
+        let flavorInput = "production"
+        KonnekNative.flavor = flavorInput
         
         KonnekNative.flutterEngine = FlutterEngine(name: KonnekNative.engineName)
         KonnekNative.flutterEngine?.run()
@@ -84,16 +112,16 @@ public class KonnekNative: NSObject {
                     // print("datas1: \(datas1)")
                     if let dataMap = datas1["data"] as? [String: Any],
                        let textStatus = dataMap["text_status"] as? String {
-//                        print("textStatus: \(textStatus)")
+                        //                        print("textStatus: \(textStatus)")
                     }
                     if let dataMap = datas1["data"] as? [String: Any],
                        let textButton = dataMap["text_button"] as? String {
-//                        print("textButton: \(textButton)")
+                        //                        print("textButton: \(textButton)")
                         KonnekNative.floatingButton?.setTextButton(text: textButton)
                     }
                     if let dataMap = datas1["data"] as? [String: Any],
                        let textButtonColor = dataMap["text_button_color"] as? String {
-//                        print("textButtonColor: \(textButtonColor)")
+                        //                        print("textButtonColor: \(textButtonColor)")
                         KonnekNative.floatingButton?.setTextColor(
                             color: (KonnekNative.floatingButton?.hexStringToUIColor(
                                 hex: textButtonColor
@@ -103,7 +131,7 @@ public class KonnekNative: NSObject {
                     }
                     if let dataMap = datas1["data"] as? [String: Any],
                        let buttonColor = dataMap["button_color"] as? String {
-//                        print("button_color: \(buttonColor)")
+                        //                        print("button_color: \(buttonColor)")
                         KonnekNative.floatingButton?.setButtonColor(color: (KonnekNative.floatingButton?.hexStringToUIColor(
                             hex: buttonColor
                         ) ?? UIColor(.white)
@@ -113,7 +141,7 @@ public class KonnekNative: NSObject {
                     if let dataMap = datas1["data"] as? [String: Any],
                        let iosIcon = dataMap["ios_icon"] as? String {
                         // print("ios_icon: \(iosIcon)")
-//                        print("ios_icon: ")
+                        //                        print("ios_icon: ")
                         KonnekNative.floatingButton?.setImageButton(image: (KonnekNative.floatingButton?.base64ToUIImage(
                             iosIcon
                         ) ?? UIImage()
@@ -127,7 +155,7 @@ public class KonnekNative: NSObject {
     }
     
     @objc public func floatingButtonTapped() {
-//        print("floatingButtonTapped called")
+        //        print("floatingButtonTapped called")
         guard let topVC = Self.topViewController(),
               let engine = KonnekNative.flutterEngine else { return }
         
@@ -150,7 +178,7 @@ public class KonnekNative: NSObject {
         
         let newValue: String = JSONHelper().dictionaryToJsonString(args) ?? ""
         
-//        print("🔵 Sending initData to Flutter: \(newValue)")
+        //        print("🔵 Sending initData to Flutter: \(newValue)")
         KonnekNative.methodChannel?.invokeMethod("clientConfigChannel", arguments: newValue)
         if (KonnekNative.initConfigData != "") {
             KonnekNative.methodChannel?.invokeMethod("fetchConfigData", arguments: KonnekNative.initConfigData)
@@ -178,7 +206,7 @@ public class KonnekNative: NSObject {
     
     @objc public func showFloatingButton() {
         guard let window = UIApplication.shared.windows.first else {
-//            print("No window found")
+            //            print("No window found")
             return
         }
         
@@ -189,7 +217,7 @@ public class KonnekNative: NSObject {
             button.tag = buttonTag
             window.addSubview(button)
         } else {
-//            print("Floating button already exists")
+            //            print("Floating button already exists")
         }
     }
 }
