@@ -6,8 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3B8DF1752DF80302005C5E98 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 3B8DF1742DF80302005C5E98 /* Podfile */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		35899564347A2ABEA6EAC561 /* Pods-KonnekNativeIos.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-KonnekNativeIos.debug.xcconfig"; path = "Target Support Files/Pods-KonnekNativeIos/Pods-KonnekNativeIos.debug.xcconfig"; sourceTree = "<group>"; };
 		3B8DF1682DF802BC005C5E98 /* KonnekNativeIos.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KonnekNativeIos.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B8DF1742DF80302005C5E98 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; };
+		4E3679707082E9845A60D486 /* Pods-KonnekNativeIos.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-KonnekNativeIos.release.xcconfig"; path = "Target Support Files/Pods-KonnekNativeIos/Pods-KonnekNativeIos.release.xcconfig"; sourceTree = "<group>"; };
+		B7F36E5E90F23F24D5F7C8C6 /* Pods_KonnekNativeIos.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_KonnekNativeIos.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,8 +40,11 @@
 		3B8DF15E2DF802BC005C5E98 = {
 			isa = PBXGroup;
 			children = (
+				3B8DF1742DF80302005C5E98 /* Podfile */,
 				3B8DF16A2DF802BC005C5E98 /* KonnekNativeIos */,
 				3B8DF1692DF802BC005C5E98 /* Products */,
+				C7B735B528E9D82F3C7D2468 /* Pods */,
+				5215F095A801F135AEA23AF9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -43,6 +54,23 @@
 				3B8DF1682DF802BC005C5E98 /* KonnekNativeIos.framework */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		5215F095A801F135AEA23AF9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B7F36E5E90F23F24D5F7C8C6 /* Pods_KonnekNativeIos.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C7B735B528E9D82F3C7D2468 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				35899564347A2ABEA6EAC561 /* Pods-KonnekNativeIos.debug.xcconfig */,
+				4E3679707082E9845A60D486 /* Pods-KonnekNativeIos.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -62,10 +90,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3B8DF1712DF802BC005C5E98 /* Build configuration list for PBXNativeTarget "KonnekNativeIos" */;
 			buildPhases = (
+				3308BD4017A8B16C86E10E31 /* [CP] Check Pods Manifest.lock */,
 				3B8DF1632DF802BC005C5E98 /* Headers */,
+				641C81BEEABE469A257ED485 /* [CP-User] Run Flutter Build konnek_native_core Script */,
 				3B8DF1642DF802BC005C5E98 /* Sources */,
 				3B8DF1652DF802BC005C5E98 /* Frameworks */,
 				3B8DF1662DF802BC005C5E98 /* Resources */,
+				84B0909F2BBC2210B5BDEBF9 /* [CP-User] Embed Flutter Build konnek_native_core Script */,
 			);
 			buildRules = (
 			);
@@ -75,8 +106,6 @@
 				3B8DF16A2DF802BC005C5E98 /* KonnekNativeIos */,
 			);
 			name = KonnekNativeIos;
-			packageProductDependencies = (
-			);
 			productName = KonnekNativeIos;
 			productReference = 3B8DF1682DF802BC005C5E98 /* KonnekNativeIos.framework */;
 			productType = "com.apple.product-type.framework";
@@ -120,10 +149,64 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B8DF1752DF80302005C5E98 /* Podfile in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3308BD4017A8B16C86E10E31 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-KonnekNativeIos-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		641C81BEEABE469A257ED485 /* [CP-User] Run Flutter Build konnek_native_core Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP-User] Run Flutter Build konnek_native_core Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../../Flutter Project/konnek_native_core/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build";
+		};
+		84B0909F2BBC2210B5BDEBF9 /* [CP-User] Embed Flutter Build konnek_native_core Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP-User] Embed Flutter Build konnek_native_core Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nset -u\nsource \"${SRCROOT}/../../Flutter Project/konnek_native_core/.ios/Flutter/flutter_export_environment.sh\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh embed_and_thin";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3B8DF1642DF802BC005C5E98 /* Sources */ = {
@@ -265,6 +348,7 @@
 		};
 		3B8DF1722DF802BC005C5E98 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 35899564347A2ABEA6EAC561 /* Pods-KonnekNativeIos.debug.xcconfig */;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -274,6 +358,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_MODULE_VERIFIER = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -290,7 +375,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INSTALL_MODULE = YES;
-				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_INSTALL_OBJC_HEADER = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -298,6 +383,7 @@
 		};
 		3B8DF1732DF802BC005C5E98 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4E3679707082E9845A60D486 /* Pods-KonnekNativeIos.release.xcconfig */;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -307,6 +393,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_MODULE_VERIFIER = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -323,7 +410,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INSTALL_MODULE = YES;
-				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_INSTALL_OBJC_HEADER = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
