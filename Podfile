@@ -1,6 +1,7 @@
 # Uncomment the next line to define a global platform for your project
 # platform :ios, '9.0'
 
+# flutter_application_path = '/Users/fauzanakmalmahdi/Documents/Main/Flutter Project/konnek_native_core'
 flutter_application_path = '../konnek_native_core'
 load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 

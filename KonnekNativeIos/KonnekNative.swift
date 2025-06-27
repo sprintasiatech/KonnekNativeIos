@@ -44,6 +44,11 @@ public class KonnekNative: NSObject {
         KonnekNative.clientId = clientId
         KonnekNative.clientSecret = clientSecret
         KonnekNative.flavor = flavor
+        if (flavor == "production") {
+            EnvironmentConfig.flavor = Flavor.production
+        } else if (flavor == "staging"){
+            EnvironmentConfig.flavor = Flavor.staging
+        }
         
         KonnekNative.flutterEngine = FlutterEngine(name: KonnekNative.engineName)
         KonnekNative.flutterEngine?.run()
@@ -109,7 +114,7 @@ public class KonnekNative: NSObject {
         self.configSetup = { resultData in
             DispatchQueue.main.async {
                 if let datas1 = JSONHelper().jsonStringToDict(resultData) {
-                    // print("datas1: \(datas1)")
+                     print("datas1: \(datas1)")
                     if let dataMap = datas1["data"] as? [String: Any],
                        let textStatus = dataMap["text_status"] as? String {
                         //                        print("textStatus: \(textStatus)")
