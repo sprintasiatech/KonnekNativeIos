@@ -160,7 +160,7 @@ class ApiService {
         completion: @escaping (Result<String, Error>) -> Void
     ) {
         let urlString = "\(baseUrl)channel/config/\(clientId)/\(platform)"
-        print("urlString: \(urlString)")
+        // print("urlString: \(urlString)")
         guard let url = URL(string: urlString) else { return }
         
         var request = URLRequest(url: url)
