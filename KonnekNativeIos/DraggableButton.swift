@@ -5,9 +5,12 @@ import UIKit
     private let iconImageView = UIImageView()
     private let label = UILabel()
 
-    private let buttonWidth: CGFloat = 190
     private let buttonHeight: CGFloat = 70
     private let margin: CGFloat = 16 // margin from bottom and right edges
+    let minWidth: CGFloat = 195
+    let maxWidth: CGFloat = 300
+    
+    private var userDragged = false
 
     public override init(frame: CGRect) {
         super.init(frame: CGRect(origin: .zero, size: CGSize(width: 190, height: 70)))
@@ -18,7 +21,7 @@ import UIKit
         super.init(coder: coder)
         configure()
     }
-    
+
     func hexStringToUIColor(hex: String, alpha: CGFloat = 1.0) -> UIColor? {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
@@ -52,26 +55,38 @@ import UIKit
         
         return UIColor(red: r, green: g, blue: b, alpha: alpha)
     }
+
+    private func resizeAndReposition() {
+        // Skip auto reposition if user already dragged
+        guard !userDragged, let superview = self.superview else { return }
+
+        let iconWidth: CGFloat = 45
+        let spacing: CGFloat = 8
+        let horizontalPadding: CGFloat = 24  // 12 left + 12 right
+        let textWidth = label.intrinsicContentSize.width
+
+        let contentWidth = iconWidth + spacing + textWidth + horizontalPadding
+        let finalWidth = min(max(contentWidth, minWidth), maxWidth)
+
+        let x = superview.bounds.width - finalWidth - margin
+        let y = superview.bounds.height - buttonHeight - margin
+
+        self.frame = CGRect(x: x, y: y, width: finalWidth, height: buttonHeight)
+    }
     
     func base64ToUIImage(_ base64String: String) -> UIImage? {
-        // 1. Check if the string has a data prefix (common in web contexts)
         var base64 = base64String
         if base64String.hasPrefix("data:image") {
-            // Split the string and get the base64 portion
             let parts = base64String.components(separatedBy: ",")
             guard parts.count == 2 else { return nil }
             base64 = parts[1]
         }
         
-        // 2. Convert the base64 string to Data
         guard let imageData = Data(base64Encoded: base64, options: .ignoreUnknownCharacters) else {
-//            print("Failed to create Data from base64 string")
             return nil
         }
         
-        // 3. Create UIImage from Data
         guard let image = UIImage(data: imageData) else {
-//            print("Failed to create UIImage from Data")
             return nil
         }
         
@@ -80,6 +95,7 @@ import UIKit
     
     public func setTextButton(text: String) {
         label.text = text
+        resizeAndReposition()
     }
     
     public func setTextColor(color: UIColor) {
@@ -96,29 +112,23 @@ import UIKit
     
     override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)  // Make sure to call super!
-        // Any custom drag logic
-//        let manager = KonnekNative()
-//        manager.floatingButtonTapped()
-//        print("handler touchesBegan")
     }
     
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         let manager = KonnekNative()
         manager.floatingButtonTapped()
-//        print("handler touchesEnded")
     }
 
     private func configure() {
-        self.backgroundColor = .systemBlue
+        self.backgroundColor = .white
         self.layer.cornerRadius = 16
         self.clipsToBounds = true
 
-        iconImageView.image = UIImage(systemName: "bolt.fill")
         iconImageView.tintColor = .white
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(iconImageView)
 
-        label.text = "Launch Chat"
+        label.text = "    "
         label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -142,11 +152,7 @@ import UIKit
         super.didMoveToSuperview()
 
         guard let superview = self.superview else { return }
-
-        // Set default position to bottom-right
-        let x = superview.bounds.width - buttonWidth - margin
-        let y = superview.bounds.height - buttonHeight - margin
-        self.frame = CGRect(x: x, y: y, width: buttonWidth, height: buttonHeight)
+        resizeAndReposition()   // 👈 new helper (see below)
     }
 
     @objc private func handleDrag(_ gesture: UIPanGestureRecognizer) {
@@ -156,11 +162,14 @@ import UIKit
         view.center = CGPoint(x: view.center.x + translation.x, y: view.center.y + translation.y)
         gesture.setTranslation(.zero, in: superview)
 
-        // Optional: Prevent dragging out of bounds
+        if gesture.state == .began {
+            userDragged = true   // 👈 stop auto-reposition after first drag
+        }
+
         if gesture.state == .ended {
             var frame = view.frame
-            let maxX = superview.bounds.width - buttonWidth
-            let maxY = superview.bounds.height - buttonHeight
+            let maxX = superview.bounds.width - frame.width
+            let maxY = superview.bounds.height - frame.height
 
             frame.origin.x = max(0, min(frame.origin.x, maxX))
             frame.origin.y = max(0, min(frame.origin.y, maxY))
