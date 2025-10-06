@@ -4,24 +4,24 @@ import UIKit
 @objc public class DraggableButton: UIButton {
     private let iconImageView = UIImageView()
     private let label = UILabel()
-
+    
     private let buttonHeight: CGFloat = 70
-    private let margin: CGFloat = 16 // margin from bottom and right edges
+    private let margin: CGFloat = 16
     let minWidth: CGFloat = 195
     let maxWidth: CGFloat = 300
     
     private var userDragged = false
-
+    
     public override init(frame: CGRect) {
         super.init(frame: CGRect(origin: .zero, size: CGSize(width: 190, height: 70)))
         configure()
     }
-
+    
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         configure()
     }
-
+    
     func hexStringToUIColor(hex: String, alpha: CGFloat = 1.0) -> UIColor? {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
@@ -55,22 +55,21 @@ import UIKit
         
         return UIColor(red: r, green: g, blue: b, alpha: alpha)
     }
-
+    
     private func resizeAndReposition() {
-        // Skip auto reposition if user already dragged
         guard !userDragged, let superview = self.superview else { return }
-
+        
         let iconWidth: CGFloat = 45
         let spacing: CGFloat = 8
-        let horizontalPadding: CGFloat = 24  // 12 left + 12 right
+        let horizontalPadding: CGFloat = 24
         let textWidth = label.intrinsicContentSize.width
-
+        
         let contentWidth = iconWidth + spacing + textWidth + horizontalPadding
         let finalWidth = min(max(contentWidth, minWidth), maxWidth)
-
+        
         let x = superview.bounds.width - finalWidth - margin
         let y = superview.bounds.height - buttonHeight - margin
-
+        
         self.frame = CGRect(x: x, y: y, width: finalWidth, height: buttonHeight)
     }
     
@@ -98,6 +97,14 @@ import UIKit
         resizeAndReposition()
     }
     
+    public func setTextButtonFontStyle(fontName: String) {
+        if let customFont = UIFont(name: fontName, size: label.font.pointSize) {
+            label.font = customFont
+        } else {
+            print("Font '\(fontName)' not found. Check if it's added to Info.plist and installed correctly.")
+        }
+    }
+    
     public func setTextColor(color: UIColor) {
         label.textColor = color
     }
@@ -111,69 +118,68 @@ import UIKit
     }
     
     override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesBegan(touches, with: event)  // Make sure to call super!
+        super.touchesBegan(touches, with: event)
     }
     
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let manager = KonnekNative()
-        manager.floatingButtonTapped()
+        KonnekNative.shared.floatingButtonTapped()
     }
-
+    
     private func configure() {
         self.backgroundColor = .white
         self.layer.cornerRadius = 16
         self.clipsToBounds = true
-
+        
         iconImageView.tintColor = .white
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(iconImageView)
-
+        
         label.text = "    "
         label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         label.translatesAutoresizingMaskIntoConstraints = false
         addSubview(label)
-
+        
         NSLayoutConstraint.activate([
             iconImageView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 12),
             iconImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             iconImageView.widthAnchor.constraint(equalToConstant: 45),
             iconImageView.heightAnchor.constraint(equalToConstant: 45),
-
+            
             label.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 8),
             label.centerYAnchor.constraint(equalTo: self.centerYAnchor)
         ])
-
+        
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleDrag(_:)))
         self.addGestureRecognizer(pan)
     }
-
+    
     public override func didMoveToSuperview() {
         super.didMoveToSuperview()
-
+        
         guard let superview = self.superview else { return }
-        resizeAndReposition()   // 👈 new helper (see below)
+        resizeAndReposition()
     }
-
+    
     @objc private func handleDrag(_ gesture: UIPanGestureRecognizer) {
         guard let view = gesture.view, let superview = view.superview else { return }
-
+        
         let translation = gesture.translation(in: superview)
         view.center = CGPoint(x: view.center.x + translation.x, y: view.center.y + translation.y)
         gesture.setTranslation(.zero, in: superview)
-
+        
         if gesture.state == .began {
-            userDragged = true   // 👈 stop auto-reposition after first drag
+            userDragged = true
         }
-
+        
         if gesture.state == .ended {
             var frame = view.frame
             let maxX = superview.bounds.width - frame.width
             let maxY = superview.bounds.height - frame.height
-
+            
             frame.origin.x = max(0, min(frame.origin.x, maxX))
             frame.origin.y = max(0, min(frame.origin.y, maxY))
-
+            
             UIView.animate(withDuration: 0.2) {
                 view.frame = frame
             }
