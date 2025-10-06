@@ -1,10 +1,3 @@
-//
-//  FlutterEngineHelper.swift
-//  KonnekNativeIos
-//
-//  Created by Fauzan Akmal Mahdi on 01/10/25.
-//
-
 import Flutter
 import FlutterPluginRegistrant
 
