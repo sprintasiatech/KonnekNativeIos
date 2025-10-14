@@ -110,7 +110,6 @@ import UIKit
         return image
     }
     
-    // Detect rotation via notification
     @objc private func handleOrientationChange() {
         DispatchQueue.main.async {
             self.resizeAndReposition()
@@ -121,8 +120,6 @@ import UIKit
         super.didMoveToSuperview()
         resizeAndReposition()
     }
-    
-    // MARK: - Public Setters
     
     public func setTextButton(text: String) {
         label.text = text
@@ -149,8 +146,6 @@ import UIKit
     public func setButtonColor(color: UIColor) {
         self.backgroundColor = color
     }
-    
-    // MARK: - Interaction
     
     override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
@@ -186,8 +181,6 @@ import UIKit
         }
     }
     
-    // MARK: - Setup
-    
     private func configure() {
         self.backgroundColor = .white
         self.layer.cornerRadius = 16
@@ -216,7 +209,6 @@ import UIKit
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleDrag(_:)))
         self.addGestureRecognizer(pan)
         
-        // Add observer for orientation changes
         NotificationCenter.default.addObserver(self, selector: #selector(handleOrientationChange), name: UIDevice.orientationDidChangeNotification, object: nil)
     }
 }
