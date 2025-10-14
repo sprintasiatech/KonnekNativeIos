@@ -2,7 +2,7 @@ import UIKit
 
 @objc(KonnekNative)
 public final class KonnekNative: NSObject {
-    public static let shared = KonnekNative()
+    @objc public static let shared = KonnekNative()
     
     private var floatingButton: DraggableButton?
     private var clientId: String = ""
@@ -18,7 +18,7 @@ public final class KonnekNative: NSObject {
         super.init()
     }
     
-    @objc public func initialize(clientId: String, clientSecret: String, flavor: String = "production") {
+    public func initialize(clientId: String, clientSecret: String, flavor: String = "production") {
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.flavor = flavor
@@ -29,7 +29,19 @@ public final class KonnekNative: NSObject {
         fetchConfig()
     }
     
-    @objc public func getFloatingButton(fontName: String? = nil) -> UIView {
+    // For Objective-C with all 3 parameters
+    @objc(initializeWithClientId:clientSecret:flavor:)
+    public func initializeWithFlavor(clientId: String, clientSecret: String, flavor: String) {
+        initialize(clientId: clientId, clientSecret: clientSecret, flavor: flavor)
+    }
+    
+    // For Objective-C with default production flavor
+    @objc(initializeWithClientId:clientSecret:)
+    public func initializeProduction(clientId: String, clientSecret: String) {
+        initialize(clientId: clientId, clientSecret: clientSecret, flavor: "production")
+    }
+    
+    private func createFloatingButton(fontName: String?) -> UIView {
         let button = DraggableButton()
         button.addTarget(self, action: #selector(floatingButtonTapped), for: .touchUpInside)
         button.isUserInteractionEnabled = true
@@ -67,12 +79,46 @@ public final class KonnekNative: NSObject {
         return button
     }
     
-    @objc public func showFloatingButton(fontName: String? = nil) {
+    // For Swift with default parameter
+    public func getFloatingButton(fontName: String? = nil) -> UIView {
+        return createFloatingButton(fontName: fontName)
+    }
+    
+    // For Objective-C with font name
+    @objc(getFloatingButtonWithFontName:)
+    public func getFloatingButtonWithFont(fontName: String?) -> UIView {
+        return createFloatingButton(fontName: fontName)
+    }
+    
+    // For Objective-C without font name
+    @objc(getFloatingButton)
+    public func getFloatingButtonDefault() -> UIView {
+        return createFloatingButton(fontName: nil)
+    }
+    
+    // For Swift with default parameter - convenience method that auto-adds to key window
+    public func showFloatingButton(fontName: String? = nil) {
+        addFloatingButtonToWindow(fontName: fontName)
+    }
+    
+    // For Objective-C with font name
+    @objc(showFloatingButtonWithFontName:)
+    public func showFloatingButtonWithFont(fontName: String?) {
+        addFloatingButtonToWindow(fontName: fontName)
+    }
+    
+    // For Objective-C without font name
+    @objc(showFloatingButton)
+    public func showFloatingButtonDefault() {
+        addFloatingButtonToWindow(fontName: nil)
+    }
+    
+    private func addFloatingButtonToWindow(fontName: String?) {
         guard let window = UIApplication.shared.windows.first else { return }
         
         let buttonTag = 12345
         if window.viewWithTag(buttonTag) == nil {
-            let button = getFloatingButton(fontName: fontName)
+            let button = createFloatingButton(fontName: fontName)
             button.tag = buttonTag
             window.addSubview(button)
         }
