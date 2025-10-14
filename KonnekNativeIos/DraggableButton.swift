@@ -22,6 +22,10 @@ import UIKit
         configure()
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
+    }
+    
     func hexStringToUIColor(hex: String, alpha: CGFloat = 1.0) -> UIColor? {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
@@ -57,7 +61,7 @@ import UIKit
     }
     
     private func resizeAndReposition() {
-        guard !userDragged, let superview = self.superview else { return }
+        guard let superview = self.superview else { return }
         
         let iconWidth: CGFloat = 45
         let spacing: CGFloat = 8
@@ -67,10 +71,24 @@ import UIKit
         let contentWidth = iconWidth + spacing + textWidth + horizontalPadding
         let finalWidth = min(max(contentWidth, minWidth), maxWidth)
         
-        let x = superview.bounds.width - finalWidth - margin
-        let y = superview.bounds.height - buttonHeight - margin
+        let safeInsets = superview.safeAreaInsets
         
-        self.frame = CGRect(x: x, y: y, width: finalWidth, height: buttonHeight)
+        if !userDragged {
+            let x = superview.bounds.width - finalWidth - margin - safeInsets.right
+            let y = superview.bounds.height - buttonHeight - margin - safeInsets.bottom
+            
+            self.frame = CGRect(x: x, y: y, width: finalWidth, height: buttonHeight)
+        } else {
+            var frame = self.frame
+            frame.size.width = finalWidth
+            
+            let maxX = superview.bounds.width - frame.width - margin - safeInsets.right
+            let maxY = superview.bounds.height - frame.height - margin - safeInsets.bottom
+            
+            frame.origin.x = max(margin + safeInsets.left, min(frame.origin.x, maxX))
+            frame.origin.y = max(margin + safeInsets.top, min(frame.origin.y, maxY))
+            self.frame = frame
+        }
     }
     
     func base64ToUIImage(_ base64String: String) -> UIImage? {
@@ -92,6 +110,20 @@ import UIKit
         return image
     }
     
+    // Detect rotation via notification
+    @objc private func handleOrientationChange() {
+        DispatchQueue.main.async {
+            self.resizeAndReposition()
+        }
+    }
+    
+    public override func didMoveToSuperview() {
+        super.didMoveToSuperview()
+        resizeAndReposition()
+    }
+    
+    // MARK: - Public Setters
+    
     public func setTextButton(text: String) {
         label.text = text
         resizeAndReposition()
@@ -100,6 +132,7 @@ import UIKit
     public func setTextButtonFontStyle(fontName: String) {
         if let customFont = UIFont(name: fontName, size: label.font.pointSize) {
             label.font = customFont
+            resizeAndReposition()
         } else {
             print("Font '\(fontName)' not found. Check if it's added to Info.plist and installed correctly.")
         }
@@ -117,6 +150,8 @@ import UIKit
         self.backgroundColor = color
     }
     
+    // MARK: - Interaction
+    
     override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
     }
@@ -124,6 +159,34 @@ import UIKit
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         KonnekNative.shared.floatingButtonTapped()
     }
+    
+    @objc private func handleDrag(_ gesture: UIPanGestureRecognizer) {
+        guard let view = gesture.view, let superview = view.superview else { return }
+        
+        let translation = gesture.translation(in: superview)
+        view.center = CGPoint(x: view.center.x + translation.x, y: view.center.y + translation.y)
+        gesture.setTranslation(.zero, in: superview)
+        
+        if gesture.state == .began {
+            userDragged = true
+        }
+        
+        if gesture.state == .ended {
+            let safeInsets = superview.safeAreaInsets
+            var frame = view.frame
+            let maxX = superview.bounds.width - frame.width - margin - safeInsets.right
+            let maxY = superview.bounds.height - frame.height - margin - safeInsets.bottom
+            
+            frame.origin.x = max(margin + safeInsets.left, min(frame.origin.x, maxX))
+            frame.origin.y = max(margin + safeInsets.top, min(frame.origin.y, maxY))
+            
+            UIView.animate(withDuration: 0.2) {
+                view.frame = frame
+            }
+        }
+    }
+    
+    // MARK: - Setup
     
     private func configure() {
         self.backgroundColor = .white
@@ -152,37 +215,8 @@ import UIKit
         
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleDrag(_:)))
         self.addGestureRecognizer(pan)
-    }
-    
-    public override func didMoveToSuperview() {
-        super.didMoveToSuperview()
         
-        guard let superview = self.superview else { return }
-        resizeAndReposition()
-    }
-    
-    @objc private func handleDrag(_ gesture: UIPanGestureRecognizer) {
-        guard let view = gesture.view, let superview = view.superview else { return }
-        
-        let translation = gesture.translation(in: superview)
-        view.center = CGPoint(x: view.center.x + translation.x, y: view.center.y + translation.y)
-        gesture.setTranslation(.zero, in: superview)
-        
-        if gesture.state == .began {
-            userDragged = true
-        }
-        
-        if gesture.state == .ended {
-            var frame = view.frame
-            let maxX = superview.bounds.width - frame.width
-            let maxY = superview.bounds.height - frame.height
-            
-            frame.origin.x = max(0, min(frame.origin.x, maxX))
-            frame.origin.y = max(0, min(frame.origin.y, maxY))
-            
-            UIView.animate(withDuration: 0.2) {
-                view.frame = frame
-            }
-        }
+        // Add observer for orientation changes
+        NotificationCenter.default.addObserver(self, selector: #selector(handleOrientationChange), name: UIDevice.orientationDidChangeNotification, object: nil)
     }
 }
