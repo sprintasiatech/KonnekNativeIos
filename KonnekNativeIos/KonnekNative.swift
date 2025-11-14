@@ -11,34 +11,55 @@ public final class KonnekNative: NSObject {
     private var initConfigData: String = ""
     
     private let konnekService = KonnekService()
-    private let flutterHelper = FlutterEngineHelper()
+    private var flutterProvider: FlutterEngineProvider?
     private var configSetup: ((String) -> Void)?
     
     private override init() {
         super.init()
     }
     
-    public func initialize(clientId: String, clientSecret: String, flavor: String = "production") {
+    /// Initialize the SDK with Flutter engine provider from App Consumer
+    /// - Parameters:
+    ///   - clientId: Your client ID
+    ///   - clientSecret: Your client secret
+    ///   - flutterEngineFactory: Factory that creates Flutter engine provider
+    ///   - flavor: Environment flavor (default: "production")
+    public func initialize(
+        clientId: String,
+        clientSecret: String,
+        flutterEngineFactory: FlutterEngineFactory,
+        flavor: String = "production"
+    ) {
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.flavor = flavor
         EnvironmentConfig.flavor = flavor == "production" ? .production : .staging
         
-        flutterHelper.setupFlutterEngine()
-        flutterHelper.setupMethodChannel()
+        self.flutterProvider = flutterEngineFactory.createEngineProvider()
+        setupMethodChannelListener()
+
         fetchConfig()
     }
     
     // For Objective-C with all 3 parameters
-    @objc(initializeWithClientId:clientSecret:flavor:)
-    public func initializeWithFlavor(clientId: String, clientSecret: String, flavor: String) {
-        initialize(clientId: clientId, clientSecret: clientSecret, flavor: flavor)
+    @objc(initializeWithClientId:clientSecret:flutterEngineFactory:flavor:)
+    public func initializeObjC(
+        clientId: String,
+        clientSecret: String,
+        flutterEngineFactory: FlutterEngineFactory,
+        flavor: String
+    ) {
+        initialize(clientId: clientId, clientSecret: clientSecret, flutterEngineFactory: flutterEngineFactory, flavor: flavor)
     }
     
     // For Objective-C with default production flavor
-    @objc(initializeWithClientId:clientSecret:)
-    public func initializeProduction(clientId: String, clientSecret: String) {
-        initialize(clientId: clientId, clientSecret: clientSecret, flavor: "production")
+    @objc(initializeWithClientId:clientSecret:flutterEngineFactory:)
+    public func initializeObjCProduction(
+        clientId: String,
+        clientSecret: String,
+        flutterEngineFactory: FlutterEngineFactory
+    ) {
+        initialize(clientId: clientId, clientSecret: clientSecret, flutterEngineFactory: flutterEngineFactory, flavor: "production")
     }
     
     private func createFloatingButton(fontName: String?) -> UIView {
@@ -125,16 +146,24 @@ public final class KonnekNative: NSObject {
     }
     
     @objc public func floatingButtonTapped() {
-        guard let topVC = Self.topViewController() else { return }
-        
-        if let flutterVC = flutterHelper.createFlutterViewController() {
-            flutterVC.modalPresentationStyle = .fullScreen
-            invokeFlutter()
-            topVC.present(flutterVC, animated: true)
+        guard let topVC = Self.topViewController(),
+              let provider = flutterProvider else {
+            print("KonnekNative: Flutter provider not initialized")
+            return
         }
+        
+        let flutterVC = provider.createViewController()
+        flutterVC.modalPresentationStyle = .fullScreen
+        invokeFlutter()
+        topVC.present(flutterVC, animated: true)
     }
     
     public func invokeFlutter() {
+        guard let provider = flutterProvider else {
+            print("KonnekNative: Flutter provider not initialized")
+            return
+        }
+        
         let args: [String: Any] = [
             "clientId": clientId,
             "clientSecret": clientSecret,
@@ -142,19 +171,27 @@ public final class KonnekNative: NSObject {
         ]
         
         if let jsonString = JSONHelper().dictionaryToJsonString(args) {
-            flutterHelper.invokeMethod("clientConfigChannel", arguments: jsonString)
+            provider.methodChannelProvider.invokeMethod("clientConfigChannel", arguments: jsonString)
         }
         
         if !initConfigData.isEmpty {
-            flutterHelper.invokeMethod("fetchConfigData", arguments: initConfigData)
+            provider.methodChannelProvider.invokeMethod("fetchConfigData", arguments: initConfigData)
         }
     }
     
-    public func startFlutterMethodChannelListener(onEvent: @escaping (String, Any?) -> Void) {
-        flutterHelper.setMethodCallHandler { call, result in
-            onEvent(call.method, call.arguments)
+    private func setupMethodChannelListener() {
+        guard let provider = flutterProvider else { return }
+        
+        provider.methodChannelProvider.setMethodCallHandler { [weak self] method, arguments, result in
+            self?.handleFlutterMethodCall(method: method, arguments: arguments)
             result(nil)
         }
+    }
+    
+    private func handleFlutterMethodCall(method: String, arguments: Any?) {
+        // Handle method calls from Flutter
+        // You can expand this based on your needs
+        print("Received method from Flutter: \(method)")
     }
     
     private func fetchConfig() {
