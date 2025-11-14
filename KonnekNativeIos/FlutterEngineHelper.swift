@@ -7,6 +7,8 @@ final class FlutterEngineHelper {
     
     private var flutterEngine: FlutterEngine?
     private var methodChannel: FlutterMethodChannel?
+
+    private var flutterVC: FlutterViewController?
     
     init() {}
     
@@ -22,8 +24,11 @@ final class FlutterEngineHelper {
     }
     
     func createFlutterViewController() -> FlutterViewController? {
-        guard let engine = flutterEngine else { return nil }
-        return FlutterViewController(engine: engine, nibName: nil, bundle: nil)
+        if flutterVC == nil {
+            guard let engine = flutterEngine else { fatalError("Engine not initialized") }
+            flutterVC = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
+        }
+        return flutterVC
     }
     
     func invokeMethod(_ method: String, arguments: Any?) {
