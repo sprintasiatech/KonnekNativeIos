@@ -11,7 +11,6 @@ class KonnekService {
         completion: @escaping (Result<String, Error>) -> Void
     ) {
         let platformData = "ios"
-        KonnekFlutterPlugin.clientId = clientIdValue
         
         let apiService = ApiConfig().provideApiService()
         apiService.getConfig(
